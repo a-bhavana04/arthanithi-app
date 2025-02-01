@@ -14,7 +14,7 @@ model = load_model()
 def predict_stocks():
     """Predict trading actions based on stock data."""
     client = pygsheets.authorize(service_file='stock-449613-7413d6080b00.json')
-    sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/...').sheet1
+    sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/12SzviXwEFOnGIc2j7E-oyQfiwO-PeNlBXW7L3V42dGE/edit')
     data = sheet.get_as_df()
 
     # Pre-process data
@@ -41,22 +41,3 @@ def predict_stocks():
             break
 
     return jsonify({"suggestions": suggestions})
-
-@stock_bp.route('/graph/<stock_symbol>', methods=['GET'])
-def generate_graph(stock_symbol):
-    """Generate a stock graph showing buy/sell signals."""
-    client = pygsheets.authorize(service_file='stock-449613-7413d6080b00.json')
-    sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/...').sheet1
-    data = sheet.get_as_df()
-
-    stock_data = data[data['SYMBOL'] == stock_symbol]
-    if stock_data.empty:
-        return jsonify({"error": "Stock symbol not found"}), 404
-
-    # Generate and return the plot
-    plt.figure(figsize=(12, 6))
-    plt.plot(stock_data.index, stock_data['Price'], label='Price', color='blue')
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    return Response(buf.read(), mimetype='image/png')
